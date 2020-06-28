@@ -1,0 +1,105 @@
+-- DROP DATABASE IF EXISTS `ermsv2`;
+CREATE DATABASE IF NOT EXISTS `ermsv2`;
+USE `ermsv2`;
+
+CREATE TABLE IF NOT EXISTS `ermsv2`.`department` (
+  `code` VARCHAR(10) PRIMARY KEY,
+  `name` VARCHAR(300) NOT NULL,
+  `name_mm` VARCHAR(400) DEFAULT '',
+  `status` TINYINT NOT NULL DEFAULT 1,
+  `position` TINYINT UNIQUE NOT NULL AUTO_INCREMENT,
+  `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS `ermsv2`.`subject` (
+  `code` VARCHAR(15) PRIMARY KEY,
+  `name` VARCHAR(300) NOT NULL,
+  `pass` SMALLINT NOT NULL DEFAULT 50,
+  `distinction` SMALLINT NOT NULL DEFAULT 70,
+  `excellent` SMALLINT NOT NULL DEFAULT 85,
+  `maximum` SMALLINT NOT NULL DEFAULT 100,
+  `status` TINYINT NOT NULL DEFAULT 1,
+  `department_code` VARCHAR(10) NOT NULL,
+  `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY(`department_code`) REFERENCES `ermsv2`.`department`(`code`) ON DELETE NO ACTION
+);
+
+CREATE TABLE IF NOT EXISTS `ermsv2`.`major` (
+  `code` VARCHAR(10) PRIMARY KEY,
+  `name` VARCHAR(300) NOT NULL,
+  `name_mm` VARCHAR(400) DEFAULT '',
+  `type` VARCHAR(10) NOT NULL DEFAULT 'other',
+  `status` TINYINT NOT NULL DEFAULT 1,
+  `position` TINYINT UNIQUE NOT NULL AUTO_INCREMENT,
+  `department_code` VARCHAR(10) NOT NULL,
+  `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY(`department_code`) REFERENCES `ermsv2`.`department`(`code`) ON DELETE NO ACTION
+);
+
+CREATE TABLE IF NOT EXISTS `ermsv2`.`state_or_region` (
+  `id` TINYINT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `suffix` ENUM('State', 'Region'),
+  `code` VARCHAR(3) DEFAULT '',
+  `id_mm` VARCHAR(2) DEFAULT '',
+  `name_mm` VARCHAR(100) DEFAULT '',
+  `suffix_mm` VARCHAR(50) DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS `ermsv2`.`township` (
+  `code` VARCHAR(15) PRIMARY KEY,
+  `name` VARCHAR(200) DEFAULT '',
+  `name_mm` VARCHAR(300) DEFAULT '',
+  `state_or_region_id` TINYINT NOT NULL,
+  FOREIGN KEY(`state_or_region_id`) REFERENCES `ermsv2`.`state_or_region`(`id`) ON DELETE NO ACTION
+);
+
+CREATE TABLE IF NOT EXISTS `ermsv2`.`nrc` (
+  `code` VARCHAR(50) PRIMARY KEY,
+  `township_code` VARCHAR(15) NOT NULL,
+  `type` VARCHAR(10) NOT NULL,
+  `digit` INT UNSIGNED NOT NULL,
+  `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY(`township_code`) REFERENCES `ermsv2`.`township`(`code`) ON DELETE NO ACTION
+);
+
+CREATE TABLE IF NOT EXISTS `ermsv2`.`address` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+  `address` VARCHAR(500) DEFAULT '',
+  `township_code` VARCHAR(15) NOT NULL,
+  `postal_code` VARCHAR(45) DEFAULT '',
+  `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY(`township_code`) REFERENCES `ermsv2`.`township`(`code`) ON DELETE NO ACTION
+);
+
+CREATE TABLE IF NOT EXISTS `ermsv2`.`student` (
+  `entrance_id` VARCHAR(8) PRIMARY KEY,
+  `name` VARCHAR(200) NOT NULL,
+  `name_mm` VARCHAR(200) NULL DEFAULT '',
+  `nrc_code` VARCHAR(50) NOT NULL,
+  `religion` VARCHAR(45) DEFAULT '',
+  `ethnic` VARCHAR(100) DEFAULT '',
+  `gender` ENUM('M','F') NOT NULL,
+  `dob` DATE,
+  `major_code` VARCHAR(10) NOT NULL,
+  `mat_seat_no` VARCHAR(50) DEFAULT '',
+  `mat_year` SMALLINT,
+  `mat_dept` VARCHAR(200) DEFAULT '',
+  `phone` VARCHAR(150) DEFAULT '',
+  `email` VARCHAR(100) DEFAULT '',
+  `birth_place` BIGINT NOT NULL,
+  `current_address` BIGINT NOT NULL,
+  `permanent_address` BIGINT NOT NULL,
+  `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY(`nrc_code`) REFERENCES `ermsv2`.`nrc`(`code`) ON DELETE NO ACTION,
+  FOREIGN KEY(`major_code`) REFERENCES `ermsv2`.`major`(`code`) ON DELETE NO ACTION,
+  FOREIGN KEY(`birth_place`) REFERENCES `ermsv2`.`address`(`id`) ON DELETE NO ACTION,
+  FOREIGN KEY(`current_address`) REFERENCES `ermsv2`.`address`(`id`) ON DELETE NO ACTION,
+  FOREIGN KEY(`permanent_address`) REFERENCES `ermsv2`.`address`(`id`) ON DELETE NO ACTION
+);
