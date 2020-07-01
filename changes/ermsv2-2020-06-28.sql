@@ -50,7 +50,8 @@ CREATE TABLE IF NOT EXISTS `ermsv2`.`state_or_region` (
 );
 
 CREATE TABLE IF NOT EXISTS `ermsv2`.`township` (
-  `code` VARCHAR(15) PRIMARY KEY,
+  `pcode` VARCHAR(10) PRIMARY KEY,
+  `code` VARCHAR(15) NOT NULL,
   `name` VARCHAR(200) DEFAULT '',
   `name_mm` VARCHAR(300) DEFAULT '',
   `state_or_region_id` TINYINT NOT NULL,
@@ -59,22 +60,22 @@ CREATE TABLE IF NOT EXISTS `ermsv2`.`township` (
 
 CREATE TABLE IF NOT EXISTS `ermsv2`.`nrc` (
   `code` VARCHAR(50) PRIMARY KEY,
-  `township_code` VARCHAR(15) NOT NULL,
+  `township_pcode` VARCHAR(15) NOT NULL,
   `type` VARCHAR(10) NOT NULL,
   `digit` INT UNSIGNED NOT NULL,
   `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY(`township_code`) REFERENCES `ermsv2`.`township`(`code`) ON DELETE NO ACTION
+  FOREIGN KEY(`township_pcode`) REFERENCES `ermsv2`.`township`(`pcode`) ON DELETE NO ACTION
 );
 
 CREATE TABLE IF NOT EXISTS `ermsv2`.`address` (
   `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
   `address` VARCHAR(500) DEFAULT '',
-  `township_code` VARCHAR(15) NOT NULL,
+  `township_pcode` VARCHAR(15) NOT NULL,
   `postal_code` VARCHAR(45) DEFAULT '',
   `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY(`township_code`) REFERENCES `ermsv2`.`township`(`code`) ON DELETE NO ACTION
+  FOREIGN KEY(`township_pcode`) REFERENCES `ermsv2`.`township`(`pcode`) ON DELETE NO ACTION
 );
 
 CREATE TABLE IF NOT EXISTS `ermsv2`.`student` (
